@@ -7,14 +7,13 @@ namespace Building\Domain\DomainEvent;
 use Prooph\EventSourcing\AggregateChanged;
 use Rhumsaa\Uuid\Uuid;
 
-final class UserCheckedIn extends AggregateChanged
+final class UserCheckedOut extends AggregateChanged
 {
     public static function fromBuildingIdAndUsername(
         Uuid $buildingId,
-        string $name
+        string $username
     ) : self {
-        return self::occur((string) $buildingId, ['username' => $name]);
-
+        return self::occur((string) $buildingId, ['username' => $username]);
     }
 
     public function username() : string

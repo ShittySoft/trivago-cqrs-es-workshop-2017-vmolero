@@ -40,6 +40,7 @@ use Prooph\ServiceBus\Message\Bernard\BernardMessageProducer;
 use Prooph\ServiceBus\Message\Bernard\BernardSerializer;
 use Prooph\ServiceBus\MessageBus;
 use Prooph\ServiceBus\Plugin\ServiceLocatorPlugin;
+use Rhumsaa\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Zend\ServiceManager\ServiceManager;
 
@@ -207,6 +208,27 @@ return new ServiceManager([
                     new AggregateTranslator()
                 )
             );
+        },
+        Command\CheckinUser::class => function (ContainerInterface $container) : callable {
+            $buildings = $container->get(BuildingRepositoryInterface::class);
+
+            return function (Command\CheckinUser $command) use ($buildings) {
+                $buildings->get($command->building())
+                    ->checkInUser($command->username());
+                // $buildings->add($building) its not necesary
+
+            };
+        },
+        Command\CheckOutUser::class => function (ContainerInterface $container) : callable {
+            $buildings = $container->get(BuildingRepositoryInterface::class);
+
+            return function (Command\CheckOutUser $command) use ($buildings) {
+                $building = $buildings->get($command->buildingId());
+
+                $building->checkOutUser($command->username());
+
+                $buildings->add($building);
+            };
         },
     ],
 ]);

@@ -7,29 +7,28 @@ namespace Building\Domain\Command;
 use Prooph\Common\Messaging\Command;
 use Rhumsaa\Uuid\Uuid;
 
-final class CheckinUser extends Command
+final class CheckOutUser extends Command
 {
+    /**
+     * @var Uuid
+     */
+    private $buildingId;
     /**
      * @var string
      */
     private $username;
 
-    /**
-     * @var Uuid
-     */
-    private $building;
-
-    private function __construct(string $username, Uuid $building)
+    private function __construct(Uuid $buildingId, string $username)
     {
         $this->init();
 
+        $this->buildingId = $buildingId;
         $this->username = $username;
-        $this->building = $building;
     }
 
-    public static function fromBuildingAndUsername(string $username, Uuid $building) : self
+    public static function fromBuildingIdAndUsername(Uuid $buildingId, string $username) : self
     {
-        return new self($username, $building);
+        return new self($buildingId, $username);
     }
 
     public function username() : string
@@ -37,9 +36,9 @@ final class CheckinUser extends Command
         return $this->username;
     }
 
-    public function building() : Uuid
+    public function buildingId() : Uuid
     {
-        return $this->building;
+        return $this->buildingId;
     }
 
     /**
@@ -49,7 +48,7 @@ final class CheckinUser extends Command
     {
         return [
             'username' => $this->username,
-            'building' => $this->building->toString(),
+            'buildingId' => $this->buildingId->toString(),
         ];
     }
 
@@ -59,6 +58,6 @@ final class CheckinUser extends Command
     protected function setPayload(array $payload)
     {
         $this->username = $payload['username'];
-        $this->building = Uuid::fromString($payload['building']);
+        $this->buildingId = Uuid::fromString($payload['buildingId']);
     }
 }
