@@ -22,6 +22,11 @@ final class Building extends AggregateRoot
      */
     private $name;
 
+    /**
+     * @var array<string, null>
+     */
+    private $checkedInUsers = [];
+
     public static function new(string $name) : self
     {
         $self = new self();
@@ -36,7 +41,10 @@ final class Building extends AggregateRoot
 
     public function checkInUser(string $username)
     {
-        // @TODO an event needs to be raised here
+        if (in_array($username, $this->checkedInUsers)) {
+            throw new \DomainException(sprintf("User %s alreadz exists into building: %s", $username, $this->aggregateId()));
+        }
+        // Domain checks are performed here, into the aggregator.
         $this->recordThat(UserCheckedIn::fromBuildingIdAndUsername(
             $this->uuid,
             $username
@@ -59,12 +67,13 @@ final class Building extends AggregateRoot
 
     public function whenUserCheckedIn(UserCheckedIn $event)
     {
-
+        // push to an array
+        $this->checkedInUsers[$event->username()] = null;
     }
 
     public function whenUserCheckedOut(UserCheckedOut $event)
     {
-        // nothing
+        unset($this->checkedUsers[$event->username()]);
     }
 
     /**
